@@ -18,7 +18,7 @@ Before starting the installation process, make sure you have the following prere
 sudo apt-get install tofrodos iproute2 gawk gcc git make net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 gnupg wget diffstat chrpath socat xterm autoconf libtool tar unzip texinfo zlib1g-dev gcc-multilib build-essential libsdl1.2-dev libglib2.0-dev screen pax gzip
 ```
 2. Download the Petalinux 2022.4 installer from the Xilinx website and follow the installation instructions provided.
-3. If some packages are not available they have to me manually installed. Information on the specific packages required by the Petalinux software can be found on https://docs.xilinx.com/r/en-US/ug1144-petalinux-tools-reference-guide/Steps-to-Set-Up-PetaLinux-Working-Environment
+3. If some packages are not available they have to be manually installed. Information on the specific packages required by the Petalinux software can be found on https://docs.xilinx.com/r/en-US/ug1144-petalinux-tools-reference-guide/Steps-to-Set-Up-PetaLinux-Working-Environment
 
 ## Step 2: Prepare the SD Card
 1. Insert the SD card into your host computer.
@@ -27,13 +27,14 @@ sudo apt-get install tofrodos iproute2 gawk gcc git make net-tools libncurses5-d
 ```shell
 sudo fdisk /dev/sdX
 ```
-4. Inside the `fdisk` command-line interface, create a new partition table (`g` command) and then create a new primary partition (`n` command).
+4. Inside the `fdisk` command-line interface, create a new partition table (`g` command) and a new primary partition (`n` command).
 5. Set the partition type to FAT32 by using the `t` command and choosing the appropriate code (e.g., `b` for FAT32).
 6. Write the changes to the SD card by executing the `w` command and exit `fdisk`.
 7. Format the partition with the FAT32 filesystem by running the following command:
 ```shell
 sudo mkfs.vfat /dev/sdX1
 ```
+8. Mount the required Ubuntu bootfile into the SD card. Ubuntu version can be found at: https://ubuntu.com/download
 
 ## Step 3: Create the Hardware Design on Xilinx Vivado
 1. Launch Xilinx Vivado on your host machine.
@@ -41,9 +42,9 @@ sudo mkfs.vfat /dev/sdX1
 3. Specify a name and location for your project, and choose an appropriate project directory.
 4. Select the Zynq ZC7010 board as the target device for your project.
 5. Choose "RTL Project" as the project type and click "Next".
-6. Add your source files, constraints, and any other necessary design files to the project.
+6. Add your source files, constraints, and other necessary design files to the project.
 7. Proceed with the default settings for project options and IP integrator.
-8. After completing the project creation, click on "Generate Bitstream" to generate the bitstream file for your design.
+8. After completing the project creation, click "Generate Bitstream" to generate the bitstream file for your design.
 9. Once the bitstream generation is complete, export the hardware design by selecting "File" -> "Export" -> "Export Hardware."
 10. Choose "Include bitstream" and click "OK" to export the hardware design.
 
@@ -52,14 +53,14 @@ sudo mkfs.vfat /dev/sdX1
 ```shell
 petalinux-create -t project -s project-spec/template.yml
 ```
-2. Change the directory to the newly created Petalinux, then open the configuration menu, make the necessary changes to configure the project according to your requirements. Ensure that the Ubuntu 23.04 LTS root filesystem is selected as the rootfs type. Run the following commands:
+2. Change the directory to the newly created Petalinux, then open the configuration menu, and make the necessary changes to configure the project according to your requirements. Ensure that the Ubuntu 23.04 LTS root filesystem is selected as the rootfs type. Run the following commands:
 
 ```
 cd petalinux
 petalinux-config //to build the project
 ```
 
-3. After configuring the project, save and exit the configuration menu. This is to install the necessary components and generate the bootable files for the Zynq ZC7010 board. Intially this can take up to 8 hours, but if we retry to rebuild the project it will rebuild within 15 minutes. Start the build process by running the following command:
+3. After configuring the project, save and exit the configuration menu. This is to install the necessary components and generate the bootable files for the Zynq ZC7010 board. Initially, this can take up to 8 hours, but if we retry to rebuild the project it will rebuild within 15 minutes. Start the build process by running the following command:
 ```
 petalinux-build
 ```
@@ -68,6 +69,14 @@ petalinux-build
 
 ## Step 5: Boot Ubuntu on the Zynq ZC7010 Board
 1. Insert the SD card into the Zynq ZC7010 board.
-2. Connect a USB keyboard and mouse to the ZC7010 board.
+2. Connect a designated GPIO and MIO peripherals devices (this depends on the .xsa file).
 3. Power on the board.
-4. Using any linux terminal emulator (in our case we used PuTTY) send commnads to the FPGA.
+4. Using any Linux terminal emulator (in our case we used PuTTY) send commands to the FPGA.
+
+## References
+BSP Files: https://github.com/Digilent/Zybo-Z7/releases/tag/10%2FPetalinux%2F2022.1-1?_ga=2.1236145.1035339971.1685692008-1734108723.1681792619</br>
+Pin configuration: https://digilent.com/reference/programmable-logic/zybo-z7/demos/petalinux</br>
+Tutorial Followed: https://medium.com/developments-and-implementations-on-zynq-7000-ap/install-ubuntu-16-04-lts-on-zynq-zc702-using-petalinux-2016-4-e1da902eaff7</br>
+Using Yocto to build custom Petalinux image (for missing packages which can be found on Rocko):
+https://www.youtube.com/watch?v=FMCfn0zwhaQ&t=1435s</br>
+Installation Guide for Petalinux: https://docs.xilinx.com/r/en-US/ug1144-petalinux-tools-reference-guide/Steps-to-Set-Up-PetaLinux-Working-Environment</br>
